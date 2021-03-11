@@ -111,7 +111,7 @@ build_type.new(build_name) do |conf|
   conf.cc do |cc|
       cc.include_paths << "#{`pwd`.strip}/../deps/nanovg/src"
       cc.include_paths << "#{`pwd`.strip}/../deps/pugl/"
-      cc.include_paths << "#{`pwd`.strip}/../deps/libuv-v1.9.1/include/"
+      cc.include_paths << "#{`pwd`.strip}/../deps/libuv/include/" if !linux
       cc.include_paths << "/usr/share/mingw-w64/include/" if windows
       cc.include_paths << "/usr/x86_64-w64-mingw32/include/" if windows
       cc.flags << "-DLDBL_EPSILON=1e-6" if windows
@@ -131,10 +131,12 @@ build_type.new(build_name) do |conf|
       linker.libraries << 'osc-bridge'
       linker.flags_after_libraries  << "#{`pwd`.strip}/../deps/libnanovg.a"
       if(!windows)
-        linker.flags_after_libraries  << "#{`pwd`.strip}/../deps/libuv.a"
-        if(ENV['OS'] != "Mac")
+        if(!mac)
           linker.libraries << 'GL'
           linker.libraries << 'X11'
+          linker.flags_after_libraries << `pkg-config --libs libuv`.strip
+        else
+          linker.flags_after_libraries  << "#{`pwd`.strip}/../deps/libuv.a"
         end
         linker.flags_after_libraries  << "-lpthread -ldl -lm"
       else

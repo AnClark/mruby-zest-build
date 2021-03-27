@@ -4,7 +4,7 @@ deps/libnanovg.a
 deps/librtosc.a
 deps/libuv-v1.9.1.tar.gz
 deps/libuv-v1.9.1/
-deps/libuv.a
+deps/libuv*.a
 libzest.so
 mruby.trace
 package/
@@ -15,3 +15,6 @@ zest-w.txt
 zynaddsubfx-3.0.0.tar.bz2
 src/mruby-widget-lib/mrblib/fcache.rb
 zest
+zest.exe
+build_config.rb.lock
+libzest*

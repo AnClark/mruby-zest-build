@@ -34,15 +34,9 @@
 [submodule "src/mruby-qml-spawn"]
 	path = src/mruby-qml-spawn
 	url = https://github.com/mruby-zest/mruby-qml-spawn
-[submodule "src/mruby-zest"]
-	path = src/mruby-zest
-	url = https://github.com/mruby-zest/mruby-zest
 [submodule "src/mruby-qml-parse"]
 	path = src/mruby-qml-parse
 	url = https://github.com/mruby-zest/mruby-qml-parse
-[submodule "deps/osc-bridge"]
-	path = src/osc-bridge
-	url = https://github.com/mruby-zest/osc-bridge
 [submodule "deps/mruby-complex"]
 	path = deps/mruby-complex
 	url = https://github.com/pbosetti/mruby-complex
@@ -58,3 +52,6 @@
 [submodule "deps/mruby-process"]
 	path = deps/mruby-process
 	url = https://github.com/iij/mruby-process
+[submodule "deps/libuv"]
+	path = deps/libuv
+	url = https://github.com/libuv/libuv

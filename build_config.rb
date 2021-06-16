@@ -1,8 +1,12 @@
 puts "Environment is:"
 puts ENV['OS']
-puts ENV.include? "WINDOWS"
+
+linux   = RbConfig::CONFIG['host_os'].include? "linux"
 windows = ENV.include? "WINDOWS"
-RUBY_PLATFORM = "mingw" if ENV.include? "WINDOWS"
+mac     = ENV['OS'] == "Mac"
+linux   = false if windows || mac
+
+RUBY_PLATFORM = "mingw" if windows
 
 if(windows)
   puts" Setting up host build"
@@ -54,6 +58,7 @@ build_type.new(build_name) do |conf|
 
   conf.cc.defines = %w(MRUBY_NANOVG_GL2 MRB_ENABLE_DEBUG_HOOK)
   conf.cc.flags << '-O3'
+  conf.host_target = 'x86_64-w64-mingw32' if windows
 
   #No default gems
   # Use standard print/puts/p
@@ -91,15 +96,21 @@ build_type.new(build_name) do |conf|
   conf.gem :core => "mruby-eval"
 
   #Non-STD lib gems
-  conf.gem 'deps/mruby-dir'
-  conf.gem 'deps/mruby-dir-glob'
   conf.gem 'deps/mruby-errno'
-  conf.gem 'deps/mruby-file-stat'
-  conf.gem 'deps/mruby-io'
+  conf.gem 'mruby/mrbgems/mruby-io'
   conf.gem 'deps/mruby-nanovg'
-#  conf.gem 'deps/mruby-process'
   conf.gem 'deps/mruby-regexp-pcre'
   conf.gem 'deps/mruby-set'
+
+  if(!windows)
+    #Needed for hotloading, but we can ignore that on windows...
+    conf.gem 'deps/mruby-file-stat'
+    conf.gem 'deps/mruby-dir'
+    conf.gem 'deps/mruby-dir-glob'
+    #I don't think mruby-process is required for anything besides some tests
+    #which we don't run anyway
+    conf.gem 'deps/mruby-process'
+  end
 
   demo_mode = false
   if(ENV.include?("BUILD_MODE"))
@@ -111,7 +122,7 @@ build_type.new(build_name) do |conf|
   conf.cc do |cc|
       cc.include_paths << "#{`pwd`.strip}/../deps/nanovg/src"
       cc.include_paths << "#{`pwd`.strip}/../deps/pugl/"
-      cc.include_paths << "#{`pwd`.strip}/../deps/libuv-v1.9.1/include/"
+      cc.include_paths << "#{`pwd`.strip}/../deps/libuv/include/" if !linux
       cc.include_paths << "/usr/share/mingw-w64/include/" if windows
       cc.include_paths << "/usr/x86_64-w64-mingw32/include/" if windows
       cc.flags << "-DLDBL_EPSILON=1e-6" if windows
@@ -131,10 +142,12 @@ build_type.new(build_name) do |conf|
       linker.libraries << 'osc-bridge'
       linker.flags_after_libraries  << "#{`pwd`.strip}/../deps/libnanovg.a"
       if(!windows)
-        linker.flags_after_libraries  << "#{`pwd`.strip}/../deps/libuv.a"
-        if(ENV['OS'] != "Mac")
+        if(!mac)
           linker.libraries << 'GL'
           linker.libraries << 'X11'
+          linker.flags_after_libraries << `pkg-config --libs libuv`.strip
+        else
+          linker.flags_after_libraries  << "#{`pwd`.strip}/../deps/libuv.a"
         end
         linker.flags_after_libraries  << "-lpthread -ldl -lm"
       else
